@@ -33,7 +33,11 @@ def login(telegram_data):
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        return response.json()
+        try:
+            return response.json()
+        except json.JSONDecodeError:
+            print("Failed to parse JSON response")
+            return None
     else:
         print(f"Login failed: {response.status_code}")
         return None
@@ -63,7 +67,11 @@ def check_tasks(telegram_data):
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        return response.json().get('tasks', [])
+        try:
+            return response.json().get('tasks', [])
+        except json.JSONDecodeError:
+            print("Failed to parse JSON response")
+            return []
     else:
         print(f"Task check failed: {response.status_code}")
         return []
@@ -113,10 +121,10 @@ def main():
         
         account_info = login(account)
         if account_info:
-            print(f"tgUsername: {account_info['tgUsername']}")
-            print(f"points: {account_info['points']}")
-            print(f"tgWalletAddress: {account_info['tgWalletAddress']}")
-            print(f"vanaWalletAddress: {account_info['vanaWalletAddress']}")
+            print(f"tgUsername: {account_info.get('tgUsername', 'N/A')}")
+            print(f"points: {account_info.get('points', 'N/A')}")
+            print(f"tgWalletAddress: {account_info.get('tgWalletAddress', 'N/A')}")
+            print(f"vanaWalletAddress: {account_info.get('vanaWalletAddress', 'N/A')}")
         
             tasks = check_tasks(account)
             for task in tasks:
