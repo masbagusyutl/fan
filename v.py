@@ -13,7 +13,7 @@ def decode_response(response):
     Decode response content based on detected encoding.
     """
     result = chardet.detect(response.content)
-    encoding = result['encoding']
+    encoding = result['encoding'] if result['encoding'] else 'utf-8'
     return response.content.decode(encoding)
 
 def login(telegram_data):
