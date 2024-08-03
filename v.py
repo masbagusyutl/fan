@@ -32,8 +32,12 @@ def login(telegram_data):
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        print(response.text)
-        return response.text
+        try:
+            return response.json()
+        except ValueError:
+            print("Invalid JSON response")
+            print(response.text)
+            return None
     else:
         print(f"Login failed: {response.status_code}")
         print(response.text)
@@ -64,8 +68,12 @@ def check_tasks(telegram_data):
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        print(response.text)
-        return response.text
+        try:
+            return response.json()
+        except ValueError:
+            print("Invalid JSON response")
+            print(response.text)
+            return None
     else:
         print(f"Task check failed: {response.status_code}")
         print(response.text)
@@ -126,11 +134,11 @@ def main():
                 print(tasks)
                 for _ in range(random.randint(5, 10)):  # Ulangi tugas secara acak antara 5 dan 10 kali
                     for task in tasks:
-                        if task['name'] in ["Refer a friend", "Connect Wallet", "Connect Telegram Wallet"]:
+                        if task.get('name') in ["Refer a friend", "Connect Wallet", "Connect Telegram Wallet"]:
                             continue
                         points = random.uniform(0.8, 2.0)
-                        print(f"Completing task: {task['name']} with {points:.2f} points (iteration)")
-                        complete_task(task['id'], points, account)
+                        print(f"Completing task: {task.get('name')} with {points:.2f} points (iteration)")
+                        complete_task(task.get('id'), points, account)
                         time.sleep(2)
         
         time.sleep(5)
