@@ -2,10 +2,19 @@ import requests
 import random
 import time
 from datetime import datetime
+import chardet
 
 def read_accounts(file_path):
     with open(file_path, 'r') as file:
         return [line.strip() for line in file.readlines()]
+
+def decode_response(response):
+    """
+    Decode response content based on detected encoding.
+    """
+    result = chardet.detect(response.content)
+    encoding = result['encoding']
+    return response.content.decode(encoding)
 
 def login(telegram_data):
     url = "https://www.vanadatahero.com/api/player"
@@ -35,8 +44,9 @@ def login(telegram_data):
         try:
             return response.json()
         except ValueError:
+            decoded_content = decode_response(response)
             print("Invalid JSON response")
-            print(response.text)
+            print(decoded_content)
             return None
     else:
         print(f"Login failed: {response.status_code}")
@@ -71,8 +81,9 @@ def check_tasks(telegram_data):
         try:
             return response.json()
         except ValueError:
+            decoded_content = decode_response(response)
             print("Invalid JSON response")
-            print(response.text)
+            print(decoded_content)
             return None
     else:
         print(f"Task check failed: {response.status_code}")
