@@ -1,5 +1,4 @@
 import requests
-import json
 import random
 import time
 from datetime import datetime
@@ -33,13 +32,11 @@ def login(telegram_data):
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        try:
-            return response.json()
-        except json.JSONDecodeError:
-            print("Failed to parse JSON response")
-            return None
+        print(response.text)
+        return response.text
     else:
         print(f"Login failed: {response.status_code}")
+        print(response.text)
         return None
 
 def check_tasks(telegram_data):
@@ -67,14 +64,12 @@ def check_tasks(telegram_data):
     }
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
-        try:
-            return response.json().get('tasks', [])
-        except json.JSONDecodeError:
-            print("Failed to parse JSON response")
-            return []
+        print(response.text)
+        return response.text
     else:
         print(f"Task check failed: {response.status_code}")
-        return []
+        print(response.text)
+        return None
 
 def complete_task(task_id, points, telegram_data):
     url = f"https://www.vanadatahero.com/api/tasks/{task_id}"
@@ -121,27 +116,22 @@ def main():
         
         account_info = login(account)
         if account_info:
-            print(f"tgUsername: {account_info.get('tgUsername', 'N/A')}")
-            print(f"points: {account_info.get('points', 'N/A')}")
-            print(f"tgWalletAddress: {account_info.get('tgWalletAddress', 'N/A')}")
-            print(f"vanaWalletAddress: {account_info.get('vanaWalletAddress', 'N/A')}")
+            # Simpan informasi akun atau lakukan apa pun yang diperlukan dengan data ini
+            # Untuk demonstrasi, kita hanya mencetak data teks mentah
+            print(account_info)
         
             tasks = check_tasks(account)
-            for task in tasks:
-                if task['name'] in ["Refer a friend", "Connect Wallet", "Connect Telegram Wallet"]:
-                    continue
-                if task['name'] == "Play game":
-                    repetitions = random.randint(5, 10)
-                    for _ in range(repetitions):
+            if tasks:
+                # Proses setiap task yang ditemukan
+                print(tasks)
+                for _ in range(random.randint(5, 10)):  # Ulangi tugas secara acak antara 5 dan 10 kali
+                    for task in tasks:
+                        if task['name'] in ["Refer a friend", "Connect Wallet", "Connect Telegram Wallet"]:
+                            continue
                         points = random.uniform(0.8, 2.0)
-                        print(f"Completing task: {task['name']} with {points} points (iteration)")
+                        print(f"Completing task: {task['name']} with {points:.2f} points (iteration)")
                         complete_task(task['id'], points, account)
                         time.sleep(2)
-                else:
-                    points = task['points']
-                    print(f"Completing task: {task['name']} with {points} points")
-                    complete_task(task['id'], points, account)
-                    time.sleep(2)
         
         time.sleep(5)
 
