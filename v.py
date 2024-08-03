@@ -14,7 +14,17 @@ def decode_response(response):
     """
     result = chardet.detect(response.content)
     encoding = result['encoding'] if result['encoding'] else 'utf-8'
-    return response.content.decode(encoding)
+    try:
+        return response.content.decode(encoding)
+    except UnicodeDecodeError:
+        # If UTF-8 decoding fails, try some common encodings
+        for enc in ['latin1', 'iso-8859-1', 'cp1252']:
+            try:
+                return response.content.decode(enc)
+            except UnicodeDecodeError:
+                continue
+        # If all decoding attempts fail, return the raw bytes
+        return response.content
 
 def login(telegram_data):
     url = "https://www.vanadatahero.com/api/player"
